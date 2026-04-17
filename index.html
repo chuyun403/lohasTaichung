@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>臺中親子樂活指南 | 公園遊具查詢</title>
+  
+  <style>
+    /* --- SCANDINAVIAN DESIGN VARIABLES --- */
+    :root {
+      --bg-color: #F9F9F7;        /* Warm off-white */
+      --surface-color: #FFFFFF;   /* Pure white for cards */
+      --text-main: #3A3A3A;       /* Soft charcoal */
+      --text-muted: #888888;      /* Light gray */
+      --accent-color: #A3B899;    /* Muted Sage Green */
+      --border-color: #EFEFEF;    /* Very soft border */
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* --- HERO SECTION --- */
+    .hero-section {
+      background: linear-gradient(135deg, #E6EFE3 0%, var(--bg-color) 100%);
+      padding: 60px 20px 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle decorative background circles */
+    .hero-section::before, .hero-section::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(163, 184, 153, 0.15);
+      z-index: 0;
+    }
+    .hero-section::before {
+      width: 300px; height: 300px;
+      top: -100px; left: -100px;
+    }
+    .hero-section::after {
+      width: 200px; height: 200px;
+      bottom: -50px; right: -50px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .hero-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 16px 0;
+      line-height: 1.3;
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* --- STICKY HEADER & FILTERS --- */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      background: rgba(249, 249, 247, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 20px 20px 15px;
+      border-bottom: 1px solid var(--border-color);
+      z-index: 1000;
+    }
+
+    .sticky-header h1 {
+      display: none; /* Hidden because the Hero section handles the title now */
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    select, input {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 15px;
+      background-color: var(--surface-color);
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(163, 184, 153, 0.2);
+    }
+
+    /* --- PAGINATION --- */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .page-btn {
+      padding: 6px 14px;
+      border: none;
+      background-color: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background-color: #EFEFEF;
+      color: var(--text-main);
+    }
+
+    .page-btn.active {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* --- MAIN CONTAINER --- */
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* --- TABLE (DESKTOP) --- */
+    #parksTable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--surface-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    #parksTable th, #parksTable td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    #parksTable th {
+      background-color: #FDFDFD;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    #parksTable tr:last-child td {
+      border-bottom: none;
+    }
+
+    .col-district { width: 15%; color: var(--text-muted); font-size: 14px; }
+    .col-park { width: 25%; font-weight: 600; font-size: 16px; }
+    .col-amenities { width: 60%; }
+
+    /* --- AMENITY BADGES --- */
+    .badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      background-color: #F4F6F6;
+      color: #555;
+    }
+
+    /* --- EMPTY STATE --- */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--surface-color);
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      margin-top: 20px;
+    }
+
+    .empty-state span {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 10px 0;
+      color: var(--text-main);
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .btn-reset {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 24px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .btn-reset:hover {
+      opacity: 0.9;
+    }
+
+    /* --- MOBILE RESPONSIVE LAYOUT --- */
+    @media (max-width: 768px) {
+      .hero-section { padding: 40px 20px 30px; }
+      .hero-title { font-size: 24px; }
+      .hero-subtitle { font-size: 14px; }
+      
+      .sticky-header { padding: 15px 15px 10px; }
+      .filters { flex-direction: column; gap: 10px; }
+      select, input { width: 100%; box-sizing: border-box; }
+      
+      #parksTable, #parksTable tbody { display: block; width: 100%; background: transparent; box-shadow: none; }
+      #parksTable thead { display: none; }
+      
+      #parksTable tr {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-color);
+        border-radius: 16px;
+        margin-bottom: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border-color);
+      }
+
+      #parksTable td {
+        display: block;
+        padding: 0;
+        border: none;
+      }
+
+      .col-district {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+      }
+      .col-park {
+        font-size: 20px;
+        margin-bottom: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-section">
+    <div class="hero-content">
+      <span class="hero-label">LOHAS Taichung</span>
+      <h2 class="hero-title">在城市綠洲中，<br>品味質感育兒生活。</h2>
+      <p class="hero-subtitle">為現代風格家庭打造的臺中綠意指南，輕鬆探索每一處讓孩子放電、讓父母放鬆的自然角落。</p>
+    </div>
+  </div>
+
+  <header class="sticky-header">
+    <h1>臺中市公園遊具查詢</h1> <div class="filters">
+      <select id="district">
+        <option value="">-- 所有行政區 --</option>
+      </select>
+      <select id="park">
+        <option value="">-- 所有公園 --</option>
+      </select>
+      <input type="text" id="search" placeholder="搜尋設施 (例: 沙坑, 溜滑梯)">
+    </div>
+    <div id="pagination" class="pagination"></div>
+  </header>
+
+  <div class="container">
+    
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <span>🍃</span>
+      <h3>找不到符合的公園</h3>
+      <p>試著調整搜尋條件，或清除篩選器重新開始</p>
+      <button id="resetBtn" class="btn-reset">清除所有條件</button>
+    </div>
+
+    <table id="parksTable">
+      <thead>
+        <tr>
+          <th class="col-district">行政區</th>
+          <th class="col-park">公園名稱</th>
+          <th class="col-amenities">公園設施</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+<script>
+    // Configuration for generating visual badges
+    const facilityConfig = {
+      "多功能/組合遊戲組": { icon: "🏰", label: "組合遊具", bg: "#E8F8F5" },
+      "搖搖樂/椅": { icon: "🐎", label: "搖搖樂", bg: "#FEF9E7" },
+      "鞦韆": { icon: "🛝", label: "鞦韆", bg: "#F5EEF8" },
+      "蹺蹺板": { icon: "⚖️", label: "蹺蹺板", bg: "#FDEDEC" },
+      "溜滑梯": { icon: "🎢", label: "溜滑梯", bg: "#EBF5FB" },
+      "沙坑": { icon: "🏖️", label: "沙坑", bg: "#FDF2E9" },
+      "攀爬架/網/遊具": { icon: "🧗", label: "攀爬架", bg: "#F4F6F6" }
+    };
+
+    fetch("111TCpark.JSON")
+      .then(response => {
+        if (!response.ok) throw new Error("Network error");
+        return response.json();
+      })
+      .then(dataset => {
+        const districtSelect = document.getElementById("district");
+        const parkSelect = document.getElementById("park");
+        const searchInput = document.getElementById("search");
+        const hasFacilitiesOnly = document.getElementById("hasFacilitiesOnly");
+        const tableBody = document.querySelector("#parksTable tbody");
+        const tableEl = document.getElementById("parksTable");
+        const emptyState = document.getElementById("emptyState");
+        const resetBtn = document.getElementById("resetBtn");
+        const paginationContainer = document.getElementById("pagination");
+
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let currentFilteredData = [];
+
+        // 1. Setup Dropdowns
+        const districts = [...new Set(dataset.map(item => item["行政區"]))].filter(Boolean);
+        districts.forEach(d => districtSelect.add(new Option(d, d)));
+
+        districtSelect.addEventListener("change", () => {
+          parkSelect.innerHTML = '<option value="">-- 所有公園 --</option>';
+          const filteredParks = dataset.filter(item => !districtSelect.value || item["行政區"] === districtSelect.value);
+          const parks = [...new Set(filteredParks.map(item => item["公園名稱"]))].filter(Boolean);
+          parks.forEach(p => parkSelect.add(new Option(p, p)));
+          
+          currentPage = 1; 
+          applyFilters();
+        });
+
+        // Event Listeners for Filters
+        parkSelect.addEventListener("change", () => { currentPage = 1; applyFilters(); });
+        searchInput.addEventListener("input", () => { currentPage = 1; applyFilters(); });
+        if(hasFacilitiesOnly) hasFacilitiesOnly.addEventListener("change", () => { currentPage = 1; applyFilters(); });
+
+        // Reset Button Logic
+        resetBtn.addEventListener("click", () => {
+          districtSelect.value = "";
+          parkSelect.innerHTML = '<option value="">-- 所有公園 --</option>';
+          searchInput.value = "";
+          if(hasFacilitiesOnly) hasFacilitiesOnly.checked = false;
+          currentPage = 1;
+          applyFilters();
+        });
+
+        // 2. Filter Logic (Includes Toggle Switch Logic)
+        function applyFilters() {
+          const district = districtSelect.value;
+          const park = parkSelect.value;
+          const keyword = searchInput.value.trim();
+          const facilitiesOnly = hasFacilitiesOnly ? hasFacilitiesOnly.checked : false;
+
+          currentFilteredData = dataset.filter(item => {
+            const matchDistrict = !district || item["行政區"] === district;
+            const matchPark = !park || item["公園名稱"] === park;
+            
+            let hasAnyFacility = false;
+            
+            const matchKeyword = !keyword || Object.entries(item).some(([key, val]) => {
+              const stringVal = val ? val.toString().trim() : "";
+              const valueMatches = stringVal.includes(keyword);
+              const keyMatches = key.includes(keyword);
+              const hasFacility = stringVal !== "" && stringVal !== "0" && stringVal !== "無";
+              
+              if (hasFacility && (facilityConfig[key] || key === "其他(請註明)")) hasAnyFacility = true;
+              return valueMatches || (keyMatches && hasFacility);
+            });
+
+            if (!keyword) {
+              for (const key of Object.keys(facilityConfig).concat(["其他(請註明)"])) {
+                 const val = item[key] ? item[key].toString().trim() : "";
+                 if (val !== "" && val !== "0" && val !== "無") hasAnyFacility = true;
+              }
+            }
+
+            // Exclude if toggle is checked and park has no facilities
+            if (facilitiesOnly && !hasAnyFacility) return false; 
+
+            return matchDistrict && matchPark && matchKeyword;
+          });
+
+          renderTable();
+        }
+
+        // 3. Render Data & Badges (Safe Scope for 'item')
+        function renderTable() {
+          if (currentFilteredData.length === 0) {
+            tableEl.style.display = "none";
+            emptyState.style.display = "block";
+            paginationContainer.innerHTML = "";
+            return;
+          } else {
+            tableEl.style.display = "table"; 
+            emptyState.style.display = "none";
+          }
+
+          const totalPages = Math.ceil(currentFilteredData.length / rowsPerPage);
+          if (currentPage > totalPages) currentPage = totalPages;
+
+          const startIndex = (currentPage - 1) * rowsPerPage;
+          const paginatedItems = currentFilteredData.slice(startIndex, startIndex + rowsPerPage);
+
+          tableBody.innerHTML = "";
+          
+          // --- THE LOOP STARTS HERE ---
+          paginatedItems.forEach(item => {
+            const row = document.createElement("tr");
+            
+            // Generate Badges dynamically based on what exists
+            let badgesHTML = '';
+            for (const [key, config] of Object.entries(facilityConfig)) {
+              const val = item[key] ? item[key].toString().trim() : "";
+              if (val !== "" && val !== "0" && val !== "無") {
+                badgesHTML += `<span class="badge" style="background-color: ${config.bg};">${config.icon} ${config.label}</span>`;
+              }
+            }
+            
+            // SMART FALLBACK LOGIC
+            if (badgesHTML === '') {
+              const otherFacility = item["其他(請註明)"] ? item["其他(請註明)"].toString().trim() : "";
+              
+              if (otherFacility !== "" && otherFacility !== "0" && otherFacility !== "無") {
+                badgesHTML = `<span class="badge" style="background-color: #F8F9F9; color: #555;">💡 ${otherFacility}</span>`;
+              } else {
+                badgesHTML = '<span class="badge" style="background-color: #F4F9F4; color: #4A7A59; border: 1px solid #E1EFE1;">🌳 基本空地 (無大型遊具)</span>';
+              }
+            }
+
+            row.innerHTML = `
+              <td class="col-district">${item["行政區"] || ''}</td>
+              <td class="col-park">${item["公園名稱"] || ''}</td>
+              <td class="col-amenities"><div class="badges-container">${badgesHTML}</div></td>
+            `;
+            tableBody.appendChild(row);
+          });
+          // --- THE LOOP ENDS HERE ---
+
+          renderPaginationControls(totalPages);
+        }
+
+        // 4. Render Pagination
+        function renderPaginationControls(totalPages) {
+          paginationContainer.innerHTML = "";
+          if (totalPages <= 1) return;
+
+          const prevBtn = document.createElement("button");
+          prevBtn.textContent = "上一頁";
+          prevBtn.className = "page-btn";
+          prevBtn.disabled = currentPage === 1;
+          prevBtn.onclick = () => { currentPage--; renderTable(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+          paginationContainer.appendChild(prevBtn);
+
+          let startPage = Math.max(1, currentPage - 2);
+          let endPage = Math.min(totalPages, currentPage + 2);
+          if (currentPage <= 2) endPage = Math.min(totalPages, 5);
+          if (currentPage >= totalPages - 1) startPage = Math.max(1, totalPages - 4);
+
+          for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.textContent = i;
+            pageBtn.className = `page-btn ${i === currentPage ? "active" : ""}`;
+            if (i !== currentPage) {
+              pageBtn.onclick = () => { currentPage = i; renderTable(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+            }
+            paginationContainer.appendChild(pageBtn);
+          }
+
+          const nextBtn = document.createElement("button");
+          nextBtn.textContent = "下一頁";
+          nextBtn.className = "page-btn";
+          nextBtn.disabled = currentPage === totalPages;
+          nextBtn.onclick = () => { currentPage++; renderTable(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+          paginationContainer.appendChild(nextBtn);
+        }
+
+        // Initial Load
+        applyFilters();
+      })
+      .catch(err => {
+        console.error(err);
+        document.body.innerHTML = `<div style="text-align:center; padding: 50px; color: red;">資料載入失敗。請確認伺服器與 111TCpark.JSON 檔案路徑。</div>`;
+      });
+  </script>
+</body>
+</html>
