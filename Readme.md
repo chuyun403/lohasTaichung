@@ -4,7 +4,7 @@
 > 
 > *Savor quality parenting life in the urban oasis. A green guide tailored for modern families to easily explore nature corners in Taichung where kids can burn off energy and parents can relax.*
 
-![App Screenshot](https://via.placeholder.com/1000x500.png?text=Placeholder:+Add+a+screenshot+of+your+beautiful+mobile+and+desktop+UI+here)
+![App Screenshot](LohasTC.png)
 
 ---
 
